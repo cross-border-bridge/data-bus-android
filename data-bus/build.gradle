@@ -1,0 +1,53 @@
+apply plugin: 'com.android.library'
+apply plugin: 'com.novoda.bintray-release'
+def pomVersion = "2.0.0"
+
+buildscript {
+    repositories {
+        jcenter()
+    }
+    dependencies {
+        classpath 'com.novoda:bintray-release:0.4.0'
+    }
+}
+
+android {
+    compileSdkVersion 23
+    buildToolsVersion "23.0.3"
+
+    defaultConfig {
+        minSdkVersion 16
+        targetSdkVersion 23
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_6
+        targetCompatibility JavaVersion.VERSION_1_6
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+}
+
+dependencies {
+    compile fileTree(dir: 'libs', include: ['*.jar'])
+    androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
+        exclude group: 'com.android.support', module: 'support-annotations'
+    })
+    compile 'com.android.support:appcompat-v7:23.2.1'
+    testCompile 'junit:junit:4.12'
+    testCompile 'org.mockito:mockito-core:1.9.5'
+    testCompile 'org.json:json:20140107'
+}
+
+publish {
+    userOrg = 'cross-border-bridge'
+    groupId = 'jp.co.dwango.cbb'
+    artifactId = 'data-bus'
+    publishVersion = pomVersion
+    desc = 'DataBus for Android'
+    website = 'https://github.com/cross-border-bridge/data-bus-android'
+}
