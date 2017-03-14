@@ -11,6 +11,7 @@ import org.junit.Test;
 public class MultiplexDataBusTest {
 	private MemoryQueueDataBus sender;
 	private MemoryQueueDataBus receiver;
+	private int counter;
 
 	@Before
 	public void setUp() {
@@ -86,6 +87,33 @@ public class MultiplexDataBusTest {
 		});
 		sender.send(new JSONArray().put("TestSlot").put("one").put(2).put(true));
 		dataBus.destroy();
+		after();
+	}
+
+	@Test
+	public void nullを含むJSONを送受信() {
+		before();
+		counter = 0;
+		DataBus dataBusR = new MultiplexDataBus(receiver, "TestSlot");
+		dataBusR.addHandler(new DataBusHandler() {
+			@Override
+			public void onReceive(JSONArray data) {
+				Assert.assertEquals(3, data.length());
+				try {
+					Assert.assertEquals("one", data.getString(0));
+					Assert.assertTrue(data.isNull(1));
+					Assert.assertTrue(data.getBoolean(2));
+				} catch (JSONException e) {
+					Assert.fail(e.toString());
+				}
+				counter++;
+			}
+		});
+		DataBus dataBusS = new MultiplexDataBus(sender, "TestSlot");
+		dataBusS.send(new JSONArray().put("one").put(null).put(true));
+		Assert.assertEquals(1, counter);
+		dataBusR.destroy();
+		dataBusS.destroy();
 		after();
 	}
 

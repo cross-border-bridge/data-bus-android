@@ -20,7 +20,7 @@ public class MultiplexDataBus extends DataBus implements DataBusHandler {
 			JSONArray packet = new JSONArray();
 			packet.put(dataId);
 			for (int i = 0; i < data.length(); i++) {
-				packet.put(data.get(i));
+				packet.put(data.isNull(i) ? null : data.get(i));
 			}
 			dataBus.send(packet);
 		} catch (JSONException e) {
@@ -32,9 +32,12 @@ public class MultiplexDataBus extends DataBus implements DataBusHandler {
 	public void onReceive(JSONArray packet) {
 		try {
 			if (packet.length() < 1) return;
+			if (packet.isNull(0)) return;
 			if (!dataId.equals(packet.get(0))) return;
 			JSONArray data = new JSONArray();
-			for (int i = 1; i < packet.length(); i++) data.put(packet.get(i));
+			for (int i = 1; i < packet.length(); i++) {
+				data.put(packet.isNull(i) ? null : packet.get(i));
+			}
 			for (DataBusHandler h : handlers) h.onReceive(data);
 		} catch (JSONException e) {
 			Logger.printStackTrace(e);
