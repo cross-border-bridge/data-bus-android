@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public abstract class DataBus {
-	final List<DataBusHandler> handlers = new ArrayList<DataBusHandler>();
+	protected final List<DataBusHandler> handlers = new ArrayList<DataBusHandler>();
 	protected boolean destroyed = false;
 
 	public static void logging(boolean enabled) {
