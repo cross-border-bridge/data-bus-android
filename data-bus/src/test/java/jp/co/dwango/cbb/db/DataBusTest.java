@@ -2,12 +2,14 @@
 package jp.co.dwango.cbb.db;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class DataBusTest {
@@ -169,6 +171,46 @@ public class DataBusTest {
 				Assert.fail();
 			}
 		});
+		after();
+	}
+
+	@Test
+	public void マルチスレッドでの検証() throws InterruptedException {
+		before();
+		final CountDownLatch receiverReady = new CountDownLatch(1);
+		final CountDownLatch receiverReceived = new CountDownLatch(1);
+		Thread r = new Thread(new Runnable() {
+			@Override
+			public void run() {
+				receiver.addHandler(new DataBusHandler() {
+					@Override
+					public void onReceive(JSONArray data) {
+						try {
+							if ("Hey".equals(data.getString(0))) {
+								receiverReceived.countDown();
+							} else {
+								Assert.fail();
+							}
+						} catch (JSONException e) {
+							Assert.fail(e.getMessage());
+						}
+					}
+				});
+				receiverReady.countDown();
+			}
+		});
+		r.start();
+		receiverReady.await();
+
+		Thread s = new Thread(new Runnable() {
+			@Override
+			public void run() {
+				sender.send(new JSONArray().put("Hey"));
+			}
+		});
+		s.start();
+		receiverReceived.await();
+
 		after();
 	}
 }
