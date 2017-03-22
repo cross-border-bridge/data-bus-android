@@ -4,10 +4,11 @@ package jp.co.dwango.cbb.db;
 import org.json.JSONArray;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public abstract class DataBus {
-	protected final List<DataBusHandler> handlers = new ArrayList<DataBusHandler>();
+	protected final List<DataBusHandler> handlers = Collections.synchronizedList(new ArrayList<DataBusHandler>());
 	protected boolean destroyed = false;
 
 	public static void logging(boolean enabled) {
