@@ -29,6 +29,7 @@ public class WebViewDataBus extends DataBus {
 	private static final String JAVASCRIPT_INTERFACE = "AndroidDataBusJSI";
 	private final Context context;
 	private final WebView webView;
+	private final boolean injectManually;
 	private boolean addedJavaScriptInterface = false;
 
 	/**
@@ -45,15 +46,43 @@ public class WebViewDataBus extends DataBus {
 	/**
 	 * 初期化 (データの受け口を作成)
 	 *
+	 * @param context        コンテキスト
+	 * @param webView        WebViewDataBus を使用する WebView
+	 * @param injectManually window.CBBの手動injectを行う場合はtrueを指定する
+	 */
+	@SuppressLint("AddJavascriptInterface")
+	public WebViewDataBus(Context context, WebView webView, boolean injectManually) {
+		this(context, webView, null, injectManually);
+	}
+
+	/**
+	 * 初期化 (データの受け口を作成)
+	 *
 	 * @param context コンテキスト
 	 * @param webView WebViewDataBus を使用する WebView
 	 * @param client  WebViewClient
 	 */
-	@SuppressLint("AddJavascriptInterface")
 	public WebViewDataBus(Context context, WebView webView, final WebViewClient client) {
+		this(context, webView, client, false);
+	}
+
+	/**
+	 * 初期化 (データの受け口を作成)
+	 *
+	 * @param context        コンテキスト
+	 * @param webView        WebViewDataBus を使用する WebView
+	 * @param client         WebViewClient
+	 * @param injectManually window.CBBの手動injectを行う場合はtrueを指定する
+	 */
+	@SuppressLint("AddJavascriptInterface")
+	public WebViewDataBus(Context context, WebView webView, final WebViewClient client, boolean injectManually) {
 		super();
 		this.context = context;
 		this.webView = webView;
+		this.injectManually = injectManually;
+		if (this.injectManually && null != client) {
+			throw new IllegalArgumentException("Cannot specify client if injectManually");
+		}
 		this.webView.addJavascriptInterface(new WebViewDataBusJSI(
 				new WebViewDataBusJSIHandler() {
 					@Override
@@ -65,6 +94,9 @@ public class WebViewDataBus extends DataBus {
 				}
 		), JAVASCRIPT_INTERFACE);
 		addedJavaScriptInterface = true;
+		if (this.injectManually) {
+			return; // do not set client if injectManually
+		}
 		if (null != client) {
 			this.webView.setWebViewClient(new WebViewClient() {
 				@Override
@@ -179,7 +211,7 @@ public class WebViewDataBus extends DataBus {
 	 *
 	 * @return WebViewDataBus の JavaScript
 	 */
-	private String getInjectJavaScript() {
+	public String getInjectJavaScript() {
 		if (destroyed) {
 			Logger.e("already destroyed");
 			return null;

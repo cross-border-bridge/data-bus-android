@@ -1,5 +1,9 @@
 # Change log
 
+## Version 2.0.4
+- `WebViewDataBus` を手動インジェクトする手段(optional)を追加
+- `WebViewDataBus#getInjectJavaScript` の アクセス修飾子を `public` に変更 (手動インジェクト時に用いる)
+
 ## Version 2.0.3
 - 依存する Gradle と Build Tools を Android Studio 2.3 対応バージョンに更新
 - `DataBus#handlers` をスレッドセーフな形に修正
