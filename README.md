@@ -18,7 +18,7 @@
 ### gradle
 ```
 dependencies {
-	compile 'jp.co.dwango.cbb:data-bus:2.0.5'
+	compile 'jp.co.dwango.cbb:data-bus:2.1.0'
 }
 ```
 
