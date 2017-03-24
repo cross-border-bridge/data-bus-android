@@ -210,7 +210,9 @@ public class DataBusTest {
 			threads[i] = new Thread(new Runnable() {
 				@Override
 				public void run() {
-					sender.send(new JSONArray().put("Hey"));
+					for (int i = 0; i < tryCount; i++) {
+						sender.send(new JSONArray().put("Hey"));
+					}
 				}
 			});
 			threads[i].start();
