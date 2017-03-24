@@ -29,7 +29,6 @@ public class WebViewDataBus extends DataBus {
 	private static final String JAVASCRIPT_INTERFACE = "AndroidDataBusJSI";
 	private final Context context;
 	private final WebView webView;
-	private final boolean injectManually;
 	private boolean addedJavaScriptInterface = false;
 
 	/**
@@ -79,8 +78,7 @@ public class WebViewDataBus extends DataBus {
 		super();
 		this.context = context;
 		this.webView = webView;
-		this.injectManually = injectManually;
-		if (this.injectManually && null != client) {
+		if (injectManually && null != client) {
 			throw new IllegalArgumentException("Cannot specify client if injectManually");
 		}
 		this.webView.addJavascriptInterface(new WebViewDataBusJSI(
@@ -94,7 +92,7 @@ public class WebViewDataBus extends DataBus {
 				}
 		), JAVASCRIPT_INTERFACE);
 		addedJavaScriptInterface = true;
-		if (this.injectManually) {
+		if (injectManually) {
 			return; // do not set client if injectManually
 		}
 		if (null != client) {
