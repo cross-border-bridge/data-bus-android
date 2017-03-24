@@ -8,7 +8,7 @@ import java.util.Collections;
 import java.util.List;
 
 public abstract class DataBus {
-	protected final List<DataBusHandler> handlers = Collections.synchronizedList(new ArrayList<DataBusHandler>());
+	private final List<DataBusHandler> handlers = Collections.synchronizedList(new ArrayList<DataBusHandler>());
 	protected boolean destroyed = false;
 
 	public static void logging(boolean enabled) {
@@ -52,6 +52,12 @@ public abstract class DataBus {
 			return 0;
 		}
 		return handlers.size();
+	}
+
+	protected void received(JSONArray data) {
+		for (DataBusHandler h : handlers) {
+			h.onReceive(data);
+		}
 	}
 
 	public void destroy() {

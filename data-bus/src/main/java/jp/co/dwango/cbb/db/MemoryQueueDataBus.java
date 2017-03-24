@@ -16,10 +16,7 @@ public class MemoryQueueDataBus extends DataBus {
 			@Override
 			public void onReceive(String data) {
 				try {
-					JSONArray jsonData = new JSONArray(data);
-					for (DataBusHandler h : handlers) {
-						h.onReceive(jsonData);
-					}
+					received(new JSONArray(data));
 				} catch (JSONException e) {
 					if (Logger.enabled) e.printStackTrace();
 				}

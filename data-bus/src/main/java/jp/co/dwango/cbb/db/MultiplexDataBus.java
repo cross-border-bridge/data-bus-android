@@ -38,7 +38,7 @@ public class MultiplexDataBus extends DataBus implements DataBusHandler {
 			for (int i = 1; i < packet.length(); i++) {
 				data.put(packet.isNull(i) ? null : packet.get(i));
 			}
-			for (DataBusHandler h : handlers) h.onReceive(data);
+			received(data);
 		} catch (JSONException e) {
 			Logger.printStackTrace(e);
 		}
