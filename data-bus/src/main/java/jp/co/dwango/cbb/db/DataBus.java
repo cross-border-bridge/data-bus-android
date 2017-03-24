@@ -8,6 +8,7 @@ import java.util.Collections;
 import java.util.List;
 
 public abstract class DataBus {
+	private final Object locker = new Object();
 	private final List<DataBusHandler> handlers = Collections.synchronizedList(new ArrayList<DataBusHandler>());
 	protected boolean destroyed = false;
 
@@ -22,10 +23,12 @@ public abstract class DataBus {
 			Logger.e("already destroyed");
 			return;
 		}
-		if (0 <= handlers.indexOf(handler)) {
-			return;
+		synchronized (locker) {
+			if (0 <= handlers.indexOf(handler)) {
+				return;
+			}
+			handlers.add(handler);
 		}
-		handlers.add(handler);
 	}
 
 	public void removeHandler(DataBusHandler handler) {
@@ -33,8 +36,10 @@ public abstract class DataBus {
 			Logger.e("already destroyed");
 			return;
 		}
-		while (handlers.contains(handler)) {
-			handlers.remove(handler);
+		synchronized (locker) {
+			while (handlers.contains(handler)) {
+				handlers.remove(handler);
+			}
 		}
 	}
 
@@ -43,7 +48,9 @@ public abstract class DataBus {
 			Logger.e("already destroyed");
 			return;
 		}
-		handlers.clear();
+		synchronized (locker) {
+			handlers.clear();
+		}
 	}
 
 	public int getHandlerCount() {
@@ -55,8 +62,14 @@ public abstract class DataBus {
 	}
 
 	protected void received(JSONArray data) {
-		for (DataBusHandler h : handlers) {
-			h.onReceive(data);
+		if (destroyed) {
+			Logger.e("already destroyed");
+			return;
+		}
+		synchronized (locker) {
+			for (DataBusHandler h : handlers) {
+				h.onReceive(data);
+			}
 		}
 	}
 
