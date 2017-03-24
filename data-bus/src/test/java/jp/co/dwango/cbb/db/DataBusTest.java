@@ -15,6 +15,7 @@ import java.util.concurrent.atomic.AtomicReference;
 public class DataBusTest {
 	private MemoryQueueDataBus sender;
 	private MemoryQueueDataBus receiver;
+	private int counter;
 
 	@Before
 	public void setUp() {
@@ -177,8 +178,10 @@ public class DataBusTest {
 	@Test
 	public void マルチスレッドでの検証() throws InterruptedException {
 		before();
+		final int tryCount = 1000;
+		final int threadCount = 10;
 		final CountDownLatch receiverReady = new CountDownLatch(1);
-		final CountDownLatch receiverReceived = new CountDownLatch(1);
+		counter = 0;
 		Thread r = new Thread(new Runnable() {
 			@Override
 			public void run() {
@@ -187,7 +190,7 @@ public class DataBusTest {
 					public void onReceive(JSONArray data) {
 						try {
 							if ("Hey".equals(data.getString(0))) {
-								receiverReceived.countDown();
+								counter++;
 							} else {
 								Assert.fail();
 							}
@@ -202,15 +205,21 @@ public class DataBusTest {
 		r.start();
 		receiverReady.await();
 
-		Thread s = new Thread(new Runnable() {
-			@Override
-			public void run() {
-				sender.send(new JSONArray().put("Hey"));
-			}
-		});
-		s.start();
-		receiverReceived.await();
+		Thread[] threads = new Thread[threadCount];
+		for (int i = 0; i < threadCount; i++) {
+			threads[i] = new Thread(new Runnable() {
+				@Override
+				public void run() {
+					sender.send(new JSONArray().put("Hey"));
+				}
+			});
+			threads[i].start();
+		}
+		for (Thread t : threads) {
+			t.join();
+		}
 
+		Assert.assertEquals(threadCount * tryCount, counter);
 		after();
 	}
 }
