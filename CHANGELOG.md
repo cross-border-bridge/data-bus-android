@@ -1,5 +1,12 @@
 # Change log
 
+## Version 2.1.0
+- `DataBus` をスレッドセーフ化（破壊的変更）
+  - `DataBus#handlers` を `private` に変更
+  - `DataBus#received` メソッド (`protected`) を追加
+    - DataBus実装はデータ受信時にこれを呼ぶ規約に変更
+	- すべてのDataBus実装はこの規約に追従する必要があります
+
 ## Version 2.0.5
 - `MemoryQueue` をスレッドセーフにする
 - リファクタ

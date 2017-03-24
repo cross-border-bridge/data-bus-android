@@ -85,9 +85,7 @@ public class WebViewDataBus extends DataBus {
 				new WebViewDataBusJSIHandler() {
 					@Override
 					public void onSend(JSONArray data) {
-						for (DataBusHandler h : handlers) {
-							h.onReceive(data);
-						}
+						received(data);
 					}
 				}
 		), JAVASCRIPT_INTERFACE);

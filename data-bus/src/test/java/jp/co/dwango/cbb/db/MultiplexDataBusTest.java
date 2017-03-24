@@ -189,4 +189,55 @@ public class MultiplexDataBusTest {
 		dataBusS3.send(new JSONArray().put("data"));
 		after();
 	}
+
+	@Test
+	public void マルチスレッドでの確認() throws InterruptedException {
+		before();
+		final int tryCount = 1000;
+		final int threadCount = 10;
+		counter = 0;
+
+		DataBus dataBusS1 = new MultiplexDataBus(sender, "layer1");
+		DataBus dataBusS2 = new MultiplexDataBus(dataBusS1, "layer2");
+		DataBus dataBusS3 = new MultiplexDataBus(dataBusS2, "layer3");
+		final DataBus[] dataBusSX = new DataBus[threadCount];
+		for (int i = 0; i < threadCount; i++) {
+			dataBusSX[i] = new MultiplexDataBus(dataBusS3, "T#" + (i + 1));
+		}
+
+		DataBus dataBusR1 = new MultiplexDataBus(receiver, "layer1");
+		DataBus dataBusR2 = new MultiplexDataBus(dataBusR1, "layer2");
+		DataBus dataBusR3 = new MultiplexDataBus(dataBusR2, "layer3");
+		DataBus[] dataBusRX = new DataBus[threadCount];
+		for (int i = 0; i < threadCount; i++) {
+			dataBusRX[i] = new MultiplexDataBus(dataBusR3, "T#" + (i + 1));
+			dataBusRX[i].addHandler(new DataBusHandler() {
+				@Override
+				public void onReceive(JSONArray data) {
+					counter++;
+				}
+			});
+		}
+
+		Thread[] threads = new Thread[threadCount];
+		for (int i = 0; i < threadCount; i++) {
+			final int tn = i;
+			threads[tn] = new Thread(new Runnable() {
+				@Override
+				public void run() {
+					for (int i = 0; i < tryCount; i++) {
+						dataBusSX[tn].send(new JSONArray().put("HELLO!"));
+					}
+				}
+			});
+			threads[tn].start();
+		}
+
+		for (Thread t : threads) {
+			t.join();
+		}
+
+		Assert.assertEquals(threadCount * tryCount, counter);
+		after();
+	}
 }
