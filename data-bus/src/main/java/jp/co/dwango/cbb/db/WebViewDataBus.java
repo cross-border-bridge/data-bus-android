@@ -45,26 +45,54 @@ public class WebViewDataBus extends DataBus {
 	/**
 	 * 初期化 (データの受け口を作成)
 	 *
+	 * @param context        コンテキスト
+	 * @param webView        WebViewDataBus を使用する WebView
+	 * @param injectManually window.CBBの手動injectを行う場合はtrueを指定する
+	 */
+	@SuppressLint("AddJavascriptInterface")
+	public WebViewDataBus(Context context, WebView webView, boolean injectManually) {
+		this(context, webView, null, injectManually);
+	}
+
+	/**
+	 * 初期化 (データの受け口を作成)
+	 *
 	 * @param context コンテキスト
 	 * @param webView WebViewDataBus を使用する WebView
 	 * @param client  WebViewClient
 	 */
-	@SuppressLint("AddJavascriptInterface")
 	public WebViewDataBus(Context context, WebView webView, final WebViewClient client) {
+		this(context, webView, client, false);
+	}
+
+	/**
+	 * 初期化 (データの受け口を作成)
+	 *
+	 * @param context        コンテキスト
+	 * @param webView        WebViewDataBus を使用する WebView
+	 * @param client         WebViewClient
+	 * @param injectManually window.CBBの手動injectを行う場合はtrueを指定する
+	 */
+	@SuppressLint("AddJavascriptInterface")
+	public WebViewDataBus(Context context, WebView webView, final WebViewClient client, boolean injectManually) {
 		super();
 		this.context = context;
 		this.webView = webView;
+		if (injectManually && null != client) {
+			throw new IllegalArgumentException("Cannot specify client if injectManually");
+		}
 		this.webView.addJavascriptInterface(new WebViewDataBusJSI(
 				new WebViewDataBusJSIHandler() {
 					@Override
 					public void onSend(JSONArray data) {
-						for (DataBusHandler h : handlers) {
-							h.onReceive(data);
-						}
+						received(data);
 					}
 				}
 		), JAVASCRIPT_INTERFACE);
 		addedJavaScriptInterface = true;
+		if (injectManually) {
+			return; // do not set client if injectManually
+		}
 		if (null != client) {
 			this.webView.setWebViewClient(new WebViewClient() {
 				@Override
@@ -179,7 +207,7 @@ public class WebViewDataBus extends DataBus {
 	 *
 	 * @return WebViewDataBus の JavaScript
 	 */
-	private String getInjectJavaScript() {
+	public String getInjectJavaScript() {
 		if (destroyed) {
 			Logger.e("already destroyed");
 			return null;

@@ -2,13 +2,14 @@
 package jp.co.dwango.cbb.db;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
  * 同一プロセス内で識別名付きのテキストデータを交換できるIPC
  */
 public class MemoryQueue {
-	private final List<MemoryQueueHandler> handlers = new ArrayList<MemoryQueueHandler>();
+	private final List<MemoryQueueHandler> handlers = Collections.synchronizedList(new ArrayList<MemoryQueueHandler>());
 
 	public MemoryQueue() {
 	}
