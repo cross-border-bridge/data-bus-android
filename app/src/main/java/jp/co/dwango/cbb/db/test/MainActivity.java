@@ -53,7 +53,7 @@ public class MainActivity extends AppCompatActivity {
 		});
 
 		// WebViewDataBusを用いるWebViewを指定してインスタンス化
-		final DataBus dataBus = new WebViewDataBus(this, webView);
+		final WebViewDataBus dataBus = new WebViewDataBus(this, webView, true);
 
 		// WebView(JavaScript) から メッセージ を受け取る ハンドラ を登録
 		final DataBusHandler handler = new DataBusHandler() {
@@ -81,7 +81,7 @@ public class MainActivity extends AppCompatActivity {
 		findViewById(R.id.native_button_send).setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				dataBus.send(new JSONArray().put("test").put(2525).put(true));
+				dataBus.send(new JSONArray().put("test%10%20%30test").put(2525).put(true));
 			}
 		});
 
@@ -93,7 +93,8 @@ public class MainActivity extends AppCompatActivity {
 		});
 
 		// WebView へコンテンツをロード
-		webView.loadDataWithBaseURL("", loadTextFromAsset("html/index.html"), "text/html", "UTF-8", null);
+		String html = loadTextFromAsset("html/index.html");
+		webView.loadDataWithBaseURL("", html.replace("$(WEB-VIEW-DATA-BUS)", dataBus.getInjectJavaScript()), "text/html", "UTF-8", null);
 	}
 
 	// assetsからテキストファイルを読み込む
