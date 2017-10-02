@@ -81,7 +81,7 @@ public class MainActivity extends AppCompatActivity {
 		findViewById(R.id.native_button_send).setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				dataBus.send(new JSONArray().put("test").put(2525).put(true));
+				dataBus.send(new JSONArray().put("test%10%20%30test").put(2525).put(true));
 			}
 		});
 
