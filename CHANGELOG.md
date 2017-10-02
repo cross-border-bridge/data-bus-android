@@ -1,5 +1,13 @@
 # Change log
 
+## Version 2.1.1
+- nativeのWebViewDataBusから送信したテキスト内容が不正に変換される問題を __Android 4.4(KitKat) 以降__ でのみ対策
+  - Android 4.3以前ではこの問題は解消されません
+- テストプログラムが実機で動作できる形に修正
+  - WebViewDataBusのJavaScriptのインジェクション方式を自動から手動に変更
+  - __自動インジェクションは実機では正常に動作しない (現状回避策が無い)__
+- 依存するgradleのバージョンを更新
+
 ## Version 2.1.0
 - `DataBus` をスレッドセーフ化（破壊的変更）
   - `DataBus#handlers` を `private` に変更
