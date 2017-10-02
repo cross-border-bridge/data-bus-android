@@ -194,12 +194,21 @@ public class WebViewDataBus extends DataBus {
 		}
 		String encoded = Base64.encodeToString(script.getBytes(), Base64.NO_WRAP);
 		Logger.d("inject: " + encoded);
-		webView.loadUrl("javascript:(function() {" +
-				"var script = document.createElement('script');" +
-				"script.type = 'text/javascript';" +
-				"script.innerHTML = window.atob('" + encoded + "');" +
-				"document.getElementsByTagName('head').item(0).appendChild(script)" +
-				"})()");
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+			webView.evaluateJavascript("(function() {" +
+					"var script = document.createElement('script');" +
+					"script.type = 'text/javascript';" +
+					"script.innerHTML = window.atob('" + encoded + "');" +
+					"document.getElementsByTagName('head').item(0).appendChild(script)" +
+					"})()", null);
+		} else {
+			webView.loadUrl("javascript:(function() {" +
+					"var script = document.createElement('script');" +
+					"script.type = 'text/javascript';" +
+					"script.innerHTML = window.atob('" + encoded + "');" +
+					"document.getElementsByTagName('head').item(0).appendChild(script)" +
+					"})()");
+		}
 	}
 
 	/**
@@ -248,10 +257,17 @@ public class WebViewDataBus extends DataBus {
 		((Activity) context).runOnUiThread(new Runnable() {
 			@Override
 			public void run() {
-				webView.loadUrl(String.format(
-						"javascript: window.AndroidDataBusNI.onSend(%s);",
-						data.toString()
-				));
+				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+					webView.evaluateJavascript(String.format(
+							"window.AndroidDataBusNI.onSend(%s);",
+							data.toString()
+					), null);
+				} else {
+					webView.loadUrl(String.format(
+							"javascript: window.AndroidDataBusNI.onSend(%s);",
+							data.toString()
+					));
+				}
 			}
 		});
 	}
