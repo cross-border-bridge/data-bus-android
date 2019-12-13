@@ -1,5 +1,8 @@
 # Change log
 
+## Version 2.1.2
+- WebViewDataBus内でContextをActivityにキャストしている箇所を削除
+
 ## Version 2.1.1
 - nativeのWebViewDataBusから送信したテキスト内容が不正に変換される問題を __Android 4.4(KitKat) 以降__ でのみ対策
   - Android 4.3以前ではこの問題は解消されません
