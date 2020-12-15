@@ -10,6 +10,7 @@ import java.util.List;
 public abstract class DataBus {
 	private final Object locker = new Object();
 	private final List<DataBusHandler> handlers = Collections.synchronizedList(new ArrayList<DataBusHandler>());
+	private final Object lockerForErrorListeners = new Object();
 	private final List<DataBusErrorListener> errorListeners =  Collections.synchronizedList(new ArrayList<DataBusErrorListener>());
 	protected boolean destroyed = false;
 
@@ -59,7 +60,7 @@ public abstract class DataBus {
 			Logger.e("already destroyed");
 			return;
 		}
-		synchronized (locker) {
+		synchronized (lockerForErrorListeners) {
 			if (0 <= errorListeners.indexOf(errorListener)) {
 				return;
 			}
@@ -72,7 +73,7 @@ public abstract class DataBus {
 			Logger.e("already destroyed");
 			return;
 		}
-		synchronized (locker) {
+		synchronized (lockerForErrorListeners) {
 			while (errorListeners.contains(errorListener)) {
 				errorListeners.remove(errorListener);
 			}
@@ -84,7 +85,7 @@ public abstract class DataBus {
 			Logger.e("already destroyed");
 			return;
 		}
-		synchronized (locker) {
+		synchronized (lockerForErrorListeners) {
 			errorListeners.clear();
 		}
 	}
@@ -114,7 +115,7 @@ public abstract class DataBus {
 			Logger.e("already destroyed");
 			return;
 		}
-		synchronized (locker) {
+		synchronized (lockerForErrorListeners) {
 			for (DataBusErrorListener l : errorListeners) {
 				l.onOutOfMemoryError(error);
 			}
