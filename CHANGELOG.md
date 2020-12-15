@@ -1,5 +1,8 @@
 # Change log
 
+## Version 2.1.3
+- send時に発生するOutOfMemoryExceptionをハンドリングできるようにする
+
 ## Version 2.1.2
 - WebViewDataBus内でContextをActivityにキャストしている箇所を削除
 

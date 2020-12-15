@@ -2,7 +2,6 @@
 package jp.co.dwango.cbb.db;
 
 import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.net.http.SslError;
@@ -255,20 +254,24 @@ public class WebViewDataBus extends DataBus {
 			Logger.e("already destroyed");
 			return;
 		}
-		Logger.d("sending: " + data.toString());
+		if (Logger.enabled) Logger.d("sending: " + data.toString());
 		new Handler(Looper.getMainLooper()).post(new Runnable() {
 			@Override
 			public void run() {
-				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-					webView.evaluateJavascript(String.format(
-							"window.AndroidDataBusNI.onSend(%s);",
-							data.toString()
-					), null);
-				} else {
-					webView.loadUrl(String.format(
-							"javascript: window.AndroidDataBusNI.onSend(%s);",
-							data.toString()
-					));
+				try {
+					if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+						webView.evaluateJavascript(String.format(
+								"window.AndroidDataBusNI.onSend(%s);",
+								data.toString()
+						), null);
+					} else {
+						webView.loadUrl(String.format(
+								"javascript: window.AndroidDataBusNI.onSend(%s);",
+								data.toString()
+						));
+					}
+				} catch (OutOfMemoryError outOfMemoryError) {
+					onOutOfMemoryError(outOfMemoryError);
 				}
 			}
 		});

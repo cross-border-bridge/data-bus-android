@@ -10,6 +10,8 @@ import java.util.List;
 public abstract class DataBus {
 	private final Object locker = new Object();
 	private final List<DataBusHandler> handlers = Collections.synchronizedList(new ArrayList<DataBusHandler>());
+	private final Object lockerForErrorListeners = new Object();
+	private final List<DataBusErrorListener> errorListeners =  Collections.synchronizedList(new ArrayList<DataBusErrorListener>());
 	protected boolean destroyed = false;
 
 	public static void logging(boolean enabled) {
@@ -53,6 +55,41 @@ public abstract class DataBus {
 		}
 	}
 
+	public void addErrorListener(DataBusErrorListener errorListener) {
+		if (destroyed) {
+			Logger.e("already destroyed");
+			return;
+		}
+		synchronized (lockerForErrorListeners) {
+			if (0 <= errorListeners.indexOf(errorListener)) {
+				return;
+			}
+			errorListeners.add(errorListener);
+		}
+	}
+
+	public void removeErrorListener(DataBusErrorListener errorListener) {
+		if (destroyed) {
+			Logger.e("already destroyed");
+			return;
+		}
+		synchronized (lockerForErrorListeners) {
+			while (errorListeners.contains(errorListener)) {
+				errorListeners.remove(errorListener);
+			}
+		}
+	}
+
+	public void removeAllErrorListener() {
+		if (destroyed) {
+			Logger.e("already destroyed");
+			return;
+		}
+		synchronized (lockerForErrorListeners) {
+			errorListeners.clear();
+		}
+	}
+
 	public int getHandlerCount() {
 		if (destroyed) {
 			Logger.e("already destroyed");
@@ -69,6 +106,18 @@ public abstract class DataBus {
 		synchronized (locker) {
 			for (DataBusHandler h : handlers) {
 				h.onReceive(data);
+			}
+		}
+	}
+
+	protected void onOutOfMemoryError(OutOfMemoryError error) {
+		if (destroyed) {
+			Logger.e("already destroyed");
+			return;
+		}
+		synchronized (lockerForErrorListeners) {
+			for (DataBusErrorListener l : errorListeners) {
+				l.onOutOfMemoryError(error);
 			}
 		}
 	}
