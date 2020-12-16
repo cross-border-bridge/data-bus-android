@@ -1,5 +1,8 @@
-apply plugin: 'com.novoda.bintray-release'
 apply plugin: 'com.android.library'
+apply plugin: 'com.jfrog.bintray'
+apply plugin: 'maven-publish'
+def libraryGroupId = 'jp.co.dwango.cbb'
+def libraryArtifactId = 'data-bus'
 def pomVersion = "2.1.3"
 
 buildscript {
@@ -7,7 +10,7 @@ buildscript {
         jcenter()
     }
     dependencies {
-        classpath 'com.novoda:bintray-release:0.5.0'
+        classpath "com.jfrog.bintray.gradle:gradle-bintray-plugin:1.8.4"
     }
 }
 
@@ -43,11 +46,45 @@ dependencies {
     testCompile 'org.json:json:20140107'
 }
 
-publish {
-    userOrg = 'cross-border-bridge'
-    groupId = 'jp.co.dwango.cbb'
-    artifactId = 'data-bus'
-    publishVersion = pomVersion
-    desc = 'DataBus for Android'
-    website = 'https://github.com/cross-border-bridge/data-bus-android'
+afterEvaluate {
+    publishing {
+        publications {
+            // Creates a Maven publication called "release".
+            release(MavenPublication) {
+                from components.release
+                groupId = libraryGroupId
+                artifactId = libraryArtifactId
+                version = pomVersion
+            }
+        }
+    }
+}
+
+bintray {
+    if (project.hasProperty('bintrayUser')) {
+        user = property('bintrayUser')
+    }
+    if (project.hasProperty('bintrayKey')) {
+        key = property('bintrayKey')
+    }
+    publications = ['release']
+    publish = true
+    if (project.hasProperty('dryRun')) {
+        dryRun = property('dryRun')
+    } else {
+        dryRun = false
+    }
+    override = true
+    pkg {
+        repo = 'maven'
+        name = libraryArtifactId
+        userOrg = 'cross-border-bridge'
+        desc = 'DataBus for Android'
+        websiteUrl = 'https://github.com/cross-border-bridge/data-bus-android'
+        publicDownloadNumbers = true
+        version {
+            name = pomVersion
+            released = new Date()
+        }
+    }
 }
